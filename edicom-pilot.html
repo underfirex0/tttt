@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDICOM PILOT — Transformation Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,200&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-0: #080A0E;
+  --bg-1: #0D1017;
+  --bg-2: #111520;
+  --bg-3: #161B2A;
+  --bg-4: #1C2235;
+  --bg-5: #222840;
+  --border: rgba(255,255,255,0.06);
+  --border-2: rgba(255,255,255,0.10);
+  --border-3: rgba(255,255,255,0.15);
+  --text-0: #F0F2F7;
+  --text-1: #A8AEC2;
+  --text-2: #6B7194;
+  --text-3: #3E4466;
+  --accent: #4F7EFF;
+  --accent-2: #7BA3FF;
+  --accent-glow: rgba(79,126,255,0.15);
+  --teal: #00D4AA;
+  --teal-dim: rgba(0,212,170,0.12);
+  --amber: #F5A623;
+  --amber-dim: rgba(245,166,35,0.12);
+  --coral: #FF6B6B;
+  --coral-dim: rgba(255,107,107,0.12);
+  --purple: #9B6DFF;
+  --purple-dim: rgba(155,109,255,0.12);
+  --green: #3ECF8E;
+  --green-dim: rgba(62,207,142,0.10);
+  --sidebar: 240px;
+  --header: 56px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg-0);color:var(--text-0);display:flex;min-height:100vh;overflow:hidden}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg-5);border-radius:99px}
+
+/* SIDEBAR */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--bg-1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;position:sticky;top:0;
+  overflow:hidden;transition:width .3s ease;
+  z-index:100;
+}
+.logo{
+  padding:0 20px;height:var(--header);
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.logo-mark{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;letter-spacing:-0.5px;
+  flex-shrink:0;
+}
+.logo-text{font-size:13px;font-weight:600;letter-spacing:0.5px;color:var(--text-0)}
+.logo-sub{font-size:9px;color:var(--text-2);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+
+.nav-section{padding:16px 12px 8px;flex-shrink:0}
+.nav-label{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-3);padding:0 8px;margin-bottom:6px;font-weight:500}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;border-radius:8px;
+  cursor:pointer;transition:all .15s ease;
+  color:var(--text-2);font-size:13px;font-weight:400;
+  position:relative;white-space:nowrap;
+  user-select:none;
+}
+.nav-item:hover{background:var(--bg-3);color:var(--text-1)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent-2)}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:2px;height:16px;background:var(--accent);border-radius:0 2px 2px 0;
+}
+.nav-icon{width:16px;height:16px;opacity:0.7;flex-shrink:0}
+.nav-badge{
+  margin-left:auto;background:var(--coral);color:#fff;
+  font-size:9px;font-weight:600;padding:2px 5px;border-radius:99px;
+  letter-spacing:0;
+}
+.nav-badge.blue{background:var(--accent)}
+.nav-badge.teal{background:var(--teal);color:#000}
+
+.sidebar-footer{
+  margin-top:auto;padding:12px;
+  border-top:1px solid var(--border);flex-shrink:0;
+}
+.user-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px;border-radius:8px;cursor:pointer;
+  transition:background .15s;
+}
+.user-row:hover{background:var(--bg-3)}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,#4F7EFF,#9B6DFF);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;color:#fff;flex-shrink:0;
+}
+.user-name{font-size:12px;font-weight:500;color:var(--text-1)}
+.user-role{font-size:10px;color:var(--text-3)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);margin-left:auto;flex-shrink:0}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh}
+
+/* TOPBAR */
+#topbar{
+  height:var(--header);flex-shrink:0;
+  background:var(--bg-1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;padding:0 24px;
+}
+.page-title{font-size:13px;font-weight:600;color:var(--text-0);letter-spacing:-0.2px}
+.page-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-btn{
+  display:flex;align-items:center;gap:6px;padding:5px 12px;
+  border-radius:7px;border:1px solid var(--border-2);background:transparent;
+  color:var(--text-2);font-size:11px;cursor:pointer;font-family:inherit;
+  transition:all .15s;white-space:nowrap;
+}
+.topbar-btn:hover{background:var(--bg-3);color:var(--text-1);border-color:var(--border-3)}
+.topbar-btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.topbar-btn.primary:hover{background:#6090FF}
+.live-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:99px;
+  background:var(--green-dim);border:1px solid rgba(62,207,142,0.2);
+  font-size:10px;color:var(--green);font-weight:500;letter-spacing:0.3px;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* CONTENT */
+#content{flex:1;overflow-y:auto;padding:24px}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-size:14px;font-weight:600;color:var(--text-0);letter-spacing:-0.3px}
+.section-action{font-size:11px;color:var(--accent-2);cursor:pointer;display:flex;align-items:center;gap:4px}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.kpi-card{
+  background:var(--bg-2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px 20px;
+  position:relative;overflow:hidden;cursor:default;
+  transition:border-color .2s,transform .2s;
+}
+.kpi-card:hover{border-color:var(--border-2);transform:translateY(-1px)}
+.kpi-card::after{
+  content:'';position:absolute;top:0;right:0;
+  width:60px;height:60px;border-radius:50%;
+  filter:blur(28px);opacity:0.15;pointer-events:none;
+}
+.kpi-card.blue::after{background:var(--accent)}
+.kpi-card.teal::after{background:var(--teal)}
+.kpi-card.amber::after{background:var(--amber)}
+.kpi-card.coral::after{background:var(--coral)}
+.kpi-card.purple::after{background:var(--purple)}
+.kpi-label{font-size:10px;color:var(--text-2);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+.kpi-value{font-size:28px;font-weight:300;letter-spacing:-1.5px;color:var(--text-0);line-height:1;margin-bottom:8px}
+.kpi-value span{font-size:15px;font-weight:400;opacity:0.6}
+.kpi-delta{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:99px}
+.kpi-delta.up{background:var(--green-dim);color:var(--green)}
+.kpi-delta.down{background:var(--coral-dim);color:var(--coral)}
+.kpi-delta.neutral{background:var(--bg-4);color:var(--text-2)}
+.kpi-icon{position:absolute;top:16px;right:16px;opacity:0.25}
+
+/* GRID LAYOUTS */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.grid-1-2{display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:16px}
+
+/* PANEL */
+.panel{
+  background:var(--bg-2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+}
+.panel-header{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-size:12px;font-weight:600;color:var(--text-0);letter-spacing:-0.2px;display:flex;align-items:center;gap:6px}
+.panel-body{padding:16px 18px}
+.panel-action{font-size:10px;color:var(--text-3);cursor:pointer;padding:4px 8px;border-radius:5px;border:1px solid var(--border);transition:all .15s}
+.panel-action:hover{color:var(--text-1);border-color:var(--border-2)}
+
+/* PROGRESS BAR */
+.progress-bar{height:3px;background:var(--bg-5);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:99px;transition:width 1s ease}
+.progress-fill.blue{background:linear-gradient(90deg,var(--accent),var(--purple))}
+.progress-fill.teal{background:linear-gradient(90deg,var(--teal),#00A89A)}
+.progress-fill.amber{background:linear-gradient(90deg,var(--amber),#F5830A)}
+.progress-fill.coral{background:linear-gradient(90deg,var(--coral),#FF4B4B)}
+.progress-fill.green{background:linear-gradient(90deg,var(--green),#28B87A)}
+.progress-fill.purple{background:linear-gradient(90deg,var(--purple),#7A4DFF)}
+
+/* STATUS BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;padding:2px 7px;border-radius:99px;letter-spacing:0.5px;text-transform:uppercase}
+.badge.live{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,0.2)}
+.badge.building{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,0.2)}
+.badge.paused{background:var(--bg-4);color:var(--text-3);border:1px solid var(--border)}
+.badge.critical{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(255,107,107,0.2)}
+.badge.planning{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(155,109,255,0.2)}
+
+/* SYSTEM CARDS */
+.sys-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sys-card{
+  background:var(--bg-2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.sys-card:hover{border-color:var(--border-2);transform:translateY(-2px);background:var(--bg-3)}
+.sys-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  opacity:0;transition:opacity .2s;
+}
+.sys-card:hover::before{opacity:1}
+.sys-card.blue::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.sys-card.teal::before{background:linear-gradient(90deg,var(--teal),transparent)}
+.sys-card.amber::before{background:linear-gradient(90deg,var(--amber),transparent)}
+.sys-card.coral::before{background:linear-gradient(90deg,var(--coral),transparent)}
+.sys-card.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.sys-card.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.sys-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.sys-name{font-size:12px;font-weight:600;color:var(--text-0);letter-spacing:-0.2px;margin-bottom:3px}
+.sys-type{font-size:10px;color:var(--text-3)}
+.sys-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sys-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.sys-metric-val{font-size:18px;font-weight:300;letter-spacing:-0.8px;color:var(--text-0)}
+.sys-metric-lbl{font-size:9px;color:var(--text-3);letter-spacing:0.5px;text-transform:uppercase;margin-top:1px}
+.sys-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.sys-owner{font-size:10px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+.sys-avatar{width:16px;height:16px;border-radius:50%;background:var(--bg-5);display:flex;align-items:center;justify-content:center;font-size:8px}
+.sys-activity{font-size:9px;color:var(--text-3)}
+
+/* ALERT ROW */
+.alert-list{display:flex;flex-direction:column;gap:6px}
+.alert-row{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:8px;background:var(--bg-3);border:1px solid var(--border);
+  transition:border-color .15s;cursor:pointer;
+}
+.alert-row:hover{border-color:var(--border-2)}
+.alert-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.alert-dot.red{background:var(--coral)}
+.alert-dot.amber{background:var(--amber)}
+.alert-dot.blue{background:var(--accent)}
+.alert-dot.green{background:var(--green)}
+.alert-text{font-size:11px;color:var(--text-1);flex:1}
+.alert-time{font-size:9px;color:var(--text-3)}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:16px}
+.timeline::before{content:'';position:absolute;left:4px;top:0;bottom:0;width:1px;background:var(--border)}
+.timeline-item{position:relative;padding-bottom:16px;padding-left:16px}
+.timeline-item::before{
+  content:'';position:absolute;left:-12px;top:5px;
+  width:8px;height:8px;border-radius:50%;border:1px solid var(--border-2);
+  background:var(--bg-3);
+}
+.timeline-item.done::before{background:var(--teal);border-color:var(--teal)}
+.timeline-item.active::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.timeline-date{font-size:9px;color:var(--text-3);letter-spacing:0.5px;margin-bottom:2px;font-family:'DM Mono',monospace}
+.timeline-text{font-size:11px;color:var(--text-1)}
+
+/* INSIGHT CARD */
+.insight-card{
+  background:var(--bg-3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;
+  margin-bottom:8px;cursor:pointer;transition:border-color .15s;
+}
+.insight-card:hover{border-color:var(--border-2)}
+.insight-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.insight-title{font-size:11px;font-weight:600;color:var(--text-0);margin-bottom:3px}
+.insight-body{font-size:10px;color:var(--text-2);line-height:1.5}
+.insight-meta{font-size:9px;color:var(--text-3);margin-top:5px;display:flex;align-items:center;gap:8px}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
+.data-table td{font-size:11px;color:var(--text-1);padding:9px 10px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg-3);color:var(--text-0)}
+.data-table .mono{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-2)}
+
+/* MINI CHART BAR */
+.sparkbar{display:flex;align-items:flex-end;gap:2px;height:28px}
+.sparkbar-col{background:var(--bg-5);border-radius:2px 2px 0 0;width:6px;transition:background .2s}
+.sparkbar:hover .sparkbar-col{background:var(--bg-4)}
+.sparkbar-col.accent{background:var(--accent)!important}
+
+/* HEALTH RING */
+.health-ring{position:relative;width:40px;height:40px;flex-shrink:0}
+.health-ring svg{transform:rotate(-90deg)}
+.health-ring-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:600;color:var(--text-0)}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;padding:3px;background:var(--bg-3);border-radius:9px;margin-bottom:20px;border:1px solid var(--border);width:fit-content}
+.tab-item{padding:6px 14px;border-radius:7px;font-size:11px;color:var(--text-2);cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:500}
+.tab-item:hover{color:var(--text-1)}
+.tab-item.active{background:var(--bg-1);color:var(--text-0);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+
+/* PAGE SECTIONS */
+.page{display:none;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* TRANSFORM PROGRESS */
+.transform-track{
+  background:var(--bg-3);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;
+}
+.transform-track-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.transform-track-name{font-size:11px;font-weight:500;color:var(--text-0)}
+.transform-track-pct{font-size:11px;font-weight:600;color:var(--text-0);font-family:'DM Mono',monospace}
+
+/* AI INSIGHT GLOW */
+.ai-panel{
+  background:linear-gradient(135deg,var(--bg-3) 0%,rgba(79,126,255,0.05) 100%);
+  border:1px solid rgba(79,126,255,0.15);
+  border-radius:var(--radius-lg);padding:16px;
+  position:relative;overflow:hidden;
+}
+.ai-panel::before{
+  content:'AI';position:absolute;right:14px;top:14px;
+  font-size:8px;letter-spacing:2px;color:var(--accent);
+  font-weight:700;opacity:0.5;
+}
+
+/* MONITORING ROW */
+.monitor-row{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;cursor:pointer;
+}
+.monitor-row:hover{background:var(--bg-3)}
+.monitor-row:last-child{border-bottom:none}
+
+/* FLOW DIAGRAM */
+.flow-diagram{display:flex;align-items:center;gap:0;overflow-x:auto;padding:16px 0}
+.flow-node{
+  flex-shrink:0;
+  background:var(--bg-3);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;
+  font-size:10px;color:var(--text-1);font-weight:500;
+  white-space:nowrap;text-align:center;
+  min-width:90px;
+}
+.flow-node.active{background:var(--accent-glow);border-color:rgba(79,126,255,0.3);color:var(--accent-2)}
+.flow-arrow{
+  width:24px;height:1px;background:var(--border-2);position:relative;flex-shrink:0;
+}
+.flow-arrow::after{
+  content:'';position:absolute;right:-3px;top:-3px;
+  border:3px solid transparent;border-left:5px solid var(--border-2);
+}
+
+/* RESPONSIVE HELPERS */
+.gap-mb{margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">EP</div>
+    <div>
+      <div class="logo-text">EDICOM PILOT</div>
+      <div class="logo-sub">Command Center</div>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding-bottom:8px">
+    <div class="nav-section">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active" onclick="showPage('exec')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1.5" y="1.5" width="5" height="5" rx="1.5"/><rect x="9.5" y="1.5" width="5" height="5" rx="1.5"/>
+          <rect x="1.5" y="9.5" width="5" height="5" rx="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.5"/>
+        </svg>
+        Executive Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('systems')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.5"/>
+          <line x1="8" y1="2" x2="8" y2="5.5"/><line x1="8" y1="10.5" x2="8" y2="14"/>
+          <line x1="2" y1="8" x2="5.5" y2="8"/><line x1="10.5" y1="8" x2="14" y2="8"/>
+        </svg>
+        Systems Registry
+        <span class="nav-badge blue">7</span>
+      </div>
+      <div class="nav-item" onclick="showPage('ai')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 1.5L10 6.5H15L11 9.5L12.5 14.5L8 11.5L3.5 14.5L5 9.5L1 6.5H6L8 1.5Z"/>
+        </svg>
+        AI Intelligence
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="showPage('ops')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6.5"/><line x1="8" y1="4.5" x2="8" y2="8.5"/>
+          <line x1="8" y1="8.5" x2="10.5" y2="10.5"/>
+        </svg>
+        Ops Monitoring
+        <span class="nav-badge">2</span>
+      </div>
+      <div class="nav-item" onclick="showPage('data')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <ellipse cx="8" cy="4.5" rx="5.5" ry="2"/><path d="M2.5 4.5v3c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2v-3"/>
+          <path d="M2.5 7.5v3c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2v-3"/>
+        </svg>
+        Data Intelligence
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="6.5" cy="6.5" r="4.5"/><line x1="9.5" y1="9.5" x2="14" y2="14"/>
+        </svg>
+        Global Search
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 4h12M5 8h6M7 12h2"/>
+        </svg>
+        Reports & Exports
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 1.5v13M1.5 8h13"/><circle cx="8" cy="8" r="3"/>
+        </svg>
+        Integrations Map
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="12" height="12" rx="2.5"/><path d="M5.5 8h5M8 5.5v5"/>
+        </svg>
+        Settings
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">DG</div>
+      <div>
+        <div class="user-name">Direction Générale</div>
+        <div class="user-role">Executive Access</div>
+      </div>
+      <div class="status-dot"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div>
+      <div class="page-title" id="page-title">Executive Transformation Dashboard</div>
+      <div class="page-sub" id="page-sub">Groupe Edicom · Télécontact — Strategic Command</div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+      <button class="topbar-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 1v10M1 6h10"/>
+        </svg>
+        New Report
+      </button>
+      <button class="topbar-btn primary">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 6s1.5-4 5-4 5 4 5 4-1.5 4-5 4-5-4-5-4z"/><circle cx="6" cy="6" r="1.5"/>
+        </svg>
+        View Report
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div id="content">
+
+    <!-- ===== PAGE: EXECUTIVE DASHBOARD ===== -->
+    <div class="page active" id="page-exec">
+
+      <!-- KPI ROW -->
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-label">Active Systems</div>
+          <div class="kpi-value">7<span>/7</span></div>
+          <div class="kpi-delta up">↑ All Online</div>
+          <div class="kpi-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">Data Enriched</div>
+          <div class="kpi-value">38<span>k</span></div>
+          <div class="kpi-delta up">↑ +2,140 this week</div>
+          <div class="kpi-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.5"><path d="M4 7h16M4 12h12M4 17h8"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Leads Generated</div>
+          <div class="kpi-value">1<span>,847</span></div>
+          <div class="kpi-delta up">↑ +312 MTD</div>
+          <div class="kpi-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">AI Confidence</div>
+          <div class="kpi-value">87<span>%</span></div>
+          <div class="kpi-delta up">↑ +3.2% vs last</div>
+          <div class="kpi-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7l3-7z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card coral">
+          <div class="kpi-label">Transformation</div>
+          <div class="kpi-value">64<span>%</span></div>
+          <div class="kpi-delta up">↑ On Track</div>
+          <div class="kpi-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN PANELS ROW 1 -->
+      <div class="grid-2-1 gap-mb">
+
+        <!-- Transformation Progress -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M1 10L5 6l3 3 4-5"/></svg>
+              Global Transformation Progress
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:10px;color:var(--text-3)">Q2 · 2025</span>
+              <div class="panel-action">View Roadmap</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">RDV Proactive System</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge live">Live</span>
+                  <span class="transform-track-pct">82%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill blue" style="width:82%"></div></div>
+            </div>
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">BI-Edicom Intelligence</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge live">Live</span>
+                  <span class="transform-track-pct">71%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill teal" style="width:71%"></div></div>
+            </div>
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">WhatsApp Lead System</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge building">Building</span>
+                  <span class="transform-track-pct">54%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill amber" style="width:54%"></div></div>
+            </div>
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">XY Enrichment System</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge live">Live</span>
+                  <span class="transform-track-pct">68%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill green" style="width:68%"></div></div>
+            </div>
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">Taxonomy System</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge building">Building</span>
+                  <span class="transform-track-pct">45%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill purple" style="width:45%"></div></div>
+            </div>
+            <div class="transform-track">
+              <div class="transform-track-header">
+                <span class="transform-track-name">Fabricant Detection</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="badge building">Building</span>
+                  <span class="transform-track-pct">39%</span>
+                </div>
+              </div>
+              <div class="progress-bar"><div class="progress-fill coral" style="width:39%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts + Timeline -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="panel" style="flex:1">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--coral)" stroke-width="1.5"><path d="M6.5 1.5l5 9H1.5l5-9z"/><line x1="6.5" y1="5.5" x2="6.5" y2="7.5"/><circle cx="6.5" cy="9.5" r=".5" fill="var(--coral)"/></svg>
+                Operational Alerts
+              </div>
+              <span class="badge critical">2 Critical</span>
+            </div>
+            <div class="panel-body" style="padding:10px 14px">
+              <div class="alert-list">
+                <div class="alert-row">
+                  <div class="alert-dot red"></div>
+                  <div class="alert-text">WhatsApp Bot qualification rate dropped to 34%</div>
+                  <div class="alert-time">2m</div>
+                </div>
+                <div class="alert-row">
+                  <div class="alert-dot red"></div>
+                  <div class="alert-text">FMC Form System — 3 forms pending validation</div>
+                  <div class="alert-time">8m</div>
+                </div>
+                <div class="alert-row">
+                  <div class="alert-dot amber"></div>
+                  <div class="alert-text">XY Enrichment: Map API rate limit warning</div>
+                  <div class="alert-time">24m</div>
+                </div>
+                <div class="alert-row">
+                  <div class="alert-dot amber"></div>
+                  <div class="alert-text">Taxonomy coverage below 60% for sector B2B</div>
+                  <div class="alert-time">1h</div>
+                </div>
+                <div class="alert-row">
+                  <div class="alert-dot blue"></div>
+                  <div class="alert-text">BI-Edicom LES500 report ready for review</div>
+                  <div class="alert-time">2h</div>
+                </div>
+                <div class="alert-row">
+                  <div class="alert-dot green"></div>
+                  <div class="alert-text">RDV Proactive: 47 appointments confirmed today</div>
+                  <div class="alert-time">3h</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Weekly Execution</div>
+            </div>
+            <div class="panel-body" style="padding:12px 14px">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                <div>
+                  <div style="font-size:18px;font-weight:300;color:var(--text-0);letter-spacing:-0.8px">312</div>
+                  <div style="font-size:9px;color:var(--text-3);margin-top:1px;letter-spacing:0.5px;text-transform:uppercase">Leads</div>
+                </div>
+                <div>
+                  <div style="font-size:18px;font-weight:300;color:var(--text-0);letter-spacing:-0.8px">2,140</div>
+                  <div style="font-size:9px;color:var(--text-3);margin-top:1px;letter-spacing:0.5px;text-transform:uppercase">Enriched</div>
+                </div>
+                <div>
+                  <div style="font-size:18px;font-weight:300;color:var(--text-0);letter-spacing:-0.8px">47</div>
+                  <div style="font-size:9px;color:var(--text-3);margin-top:1px;letter-spacing:0.5px;text-transform:uppercase">RDV</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2 -->
+      <div class="grid-3 gap-mb">
+        <!-- Activity Chart -->
+        <div class="panel" style="grid-column:span 2">
+          <div class="panel-header">
+            <div class="panel-title">Lead Generation Activity — 30 Days</div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-2)">
+                <div style="width:8px;height:2px;background:var(--accent);border-radius:2px"></div>WhatsApp
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-2)">
+                <div style="width:8px;height:2px;background:var(--teal);border-radius:2px"></div>RDV
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-2)">
+                <div style="width:8px;height:2px;background:var(--amber);border-radius:2px"></div>BI Form
+              </div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <canvas id="leadChart" height="140"></canvas>
+          </div>
+        </div>
+
+        <!-- Execution Timeline -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Execution Timeline</div>
+          </div>
+          <div class="panel-body">
+            <div class="timeline">
+              <div class="timeline-item done">
+                <div class="timeline-date">APR 01</div>
+                <div class="timeline-text">RDV Proactive — Phase 1 launched</div>
+              </div>
+              <div class="timeline-item done">
+                <div class="timeline-date">APR 14</div>
+                <div class="timeline-text">BI-Edicom LES500 data collection began</div>
+              </div>
+              <div class="timeline-item done">
+                <div class="timeline-date">MAY 02</div>
+                <div class="timeline-text">XY Enrichment map intelligence live</div>
+              </div>
+              <div class="timeline-item active">
+                <div class="timeline-date">MAY 18</div>
+                <div class="timeline-text">WhatsApp Bot AI qualification training</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">JUN 01</div>
+                <div class="timeline-text">Taxonomy coverage target: 80%</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">JUN 15</div>
+                <div class="timeline-text">Fabricant Detection full rollout</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">JUL 01</div>
+                <div class="timeline-text">Platform integration milestone — Q3</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI INSIGHTS ROW -->
+      <div class="section-header">
+        <div class="section-title">AI Intelligence Signals</div>
+        <div class="section-action" onclick="showPage('ai')">View All Insights →</div>
+      </div>
+      <div class="grid-3">
+        <div class="ai-panel">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--teal)"></div>
+            <div style="font-size:10px;font-weight:600;color:var(--teal);letter-spacing:0.5px;text-transform:uppercase">Opportunity</div>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-0);margin-bottom:6px;line-height:1.4">147 unqualified leads from Telecontact pages ready for reactivation</div>
+          <div style="font-size:10px;color:var(--text-2);line-height:1.5">WhatsApp bot historical analysis shows 68% conversion potential on dormant leads from sector Industrie.</div>
+          <div style="margin-top:10px;font-size:9px;color:var(--text-3);display:flex;gap:10px">
+            <span>Source: WhatsApp Lead System</span>
+            <span>Confidence: 87%</span>
+          </div>
+        </div>
+        <div class="ai-panel">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></div>
+            <div style="font-size:10px;font-weight:600;color:var(--amber);letter-spacing:0.5px;text-transform:uppercase">Anomaly</div>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-0);margin-bottom:6px;line-height:1.4">XY Enrichment data quality score dropped 8 points since last week</div>
+          <div style="font-size:10px;color:var(--text-2);line-height:1.5">Map API verification failures concentrated in Casablanca-Est zone. Manual review recommended.</div>
+          <div style="margin-top:10px;font-size:9px;color:var(--text-3);display:flex;gap:10px">
+            <span>Source: XY Enrichment</span>
+            <span>Confidence: 94%</span>
+          </div>
+        </div>
+        <div class="ai-panel">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--purple)"></div>
+            <div style="font-size:10px;font-weight:600;color:var(--purple);letter-spacing:0.5px;text-transform:uppercase">Prediction</div>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-0);margin-bottom:6px;line-height:1.4">RDV Proactive on track to exceed Q2 target by +18%</div>
+          <div style="font-size:10px;color:var(--text-2);line-height:1.5">Model projects 1,240 confirmed appointments by end of quarter if current velocity maintained.</div>
+          <div style="margin-top:10px;font-size:9px;color:var(--text-3);display:flex;gap:10px">
+            <span>Source: RDV System</span>
+            <span>Confidence: 91%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: SYSTEMS REGISTRY ===== -->
+    <div class="page" id="page-systems">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:11px;color:var(--text-2);margin-bottom:4px">7 Active Systems · 5 Online · 2 Building</div>
+          <div class="progress-bar" style="width:280px"><div class="progress-fill blue" style="width:72%"></div></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="topbar-btn">Filter by Status</button>
+          <button class="topbar-btn">Sort by Health</button>
+          <button class="topbar-btn primary">Add System</button>
+        </div>
+      </div>
+
+      <div class="sys-grid">
+
+        <!-- RDV PROACTIVE -->
+        <div class="sys-card blue">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">RDV Proactive</div>
+              <div class="sys-type">Commercial Appointment Management</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge live">Live</span>
+              <div class="sys-icon" style="background:var(--accent-glow)">📅</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill blue" style="width:82%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">82% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">847</div>
+              <div class="sys-metric-lbl">RDV Total</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">94%</div>
+              <div class="sys-metric-lbl">Confirm Rate</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">47</div>
+              <div class="sys-metric-lbl">Today</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-3);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--text-2);line-height:1.4;border:1px solid var(--border)">
+            🤖 AI: Optimized callback windows identified — Tuesday 10–11h shows +23% pickup rate
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--accent-glow);color:var(--accent-2)">SM</div>
+              Sales Manager
+            </div>
+            <div class="sys-activity">2h ago</div>
+          </div>
+        </div>
+
+        <!-- BI-EDICOM -->
+        <div class="sys-card teal">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">BI-Edicom</div>
+              <div class="sys-type">Enterprise Intelligence · LES500</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge live">Live</span>
+              <div class="sys-icon" style="background:var(--teal-dim)">📊</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill teal" style="width:71%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">71% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">387</div>
+              <div class="sys-metric-lbl">Forms In</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">92%</div>
+              <div class="sys-metric-lbl">Data Quality</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">LES500</div>
+              <div class="sys-metric-lbl">Scope</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-3);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--text-2);line-height:1.4;border:1px solid var(--border)">
+            🤖 AI: Sector Industrie completeness at 68% — 57 forms pending field validation
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--teal-dim);color:var(--teal)">DI</div>
+              Data Intelligence
+            </div>
+            <div class="sys-activity">4h ago</div>
+          </div>
+        </div>
+
+        <!-- FMC FORM -->
+        <div class="sys-card amber">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">FMC Form System</div>
+              <div class="sys-type">Operational Workflow Management</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge live">Live</span>
+              <div class="sys-icon" style="background:var(--amber-dim)">📋</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill amber" style="width:61%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">61% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">1,204</div>
+              <div class="sys-metric-lbl">Forms Sent</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">78%</div>
+              <div class="sys-metric-lbl">Response Rate</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">3</div>
+              <div class="sys-metric-lbl">Pending</div>
+            </div>
+          </div>
+          <div style="background:var(--coral-dim);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--coral);line-height:1.4;border:1px solid rgba(255,107,107,0.15)">
+            ⚠ Alert: 3 forms pending validation — action required from Operations team
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--amber-dim);color:var(--amber)">OP</div>
+              Operations
+            </div>
+            <div class="sys-activity">30m ago</div>
+          </div>
+        </div>
+
+        <!-- WHATSAPP LEAD -->
+        <div class="sys-card coral">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">WhatsApp Lead System</div>
+              <div class="sys-type">AI Lead Qualification · Telecontact</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge building">Building</span>
+              <div class="sys-icon" style="background:var(--coral-dim)">💬</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill coral" style="width:54%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">54% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">423</div>
+              <div class="sys-metric-lbl">Leads In</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">34%</div>
+              <div class="sys-metric-lbl">Qualify Rate</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">5</div>
+              <div class="sys-metric-lbl">Bus. Pages</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-3);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--text-2);line-height:1.4;border:1px solid var(--border)">
+            Flow: Business Page → Bot → AI Qualify → Route → Delivery → Marketplace
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--coral-dim);color:var(--coral)">TC</div>
+              Télécontact
+            </div>
+            <div class="sys-activity">2m ago</div>
+          </div>
+        </div>
+
+        <!-- TAXONOMY -->
+        <div class="sys-card purple">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">Taxonomy System</div>
+              <div class="sys-type">Business Classification Engine</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge building">Building</span>
+              <div class="sys-icon" style="background:var(--purple-dim)">🏷</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill purple" style="width:45%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">45% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">12k</div>
+              <div class="sys-metric-lbl">Classified</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">58%</div>
+              <div class="sys-metric-lbl">Coverage</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">847</div>
+              <div class="sys-metric-lbl">Categories</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-3);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--text-2);line-height:1.4;border:1px solid var(--border)">
+            🤖 AI: Semantic clustering identified 23 new subcategories for sector Services
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--purple-dim);color:var(--purple)">AI</div>
+              AI Team
+            </div>
+            <div class="sys-activity">1h ago</div>
+          </div>
+        </div>
+
+        <!-- XY ENRICHMENT -->
+        <div class="sys-card green">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">XY Enrichment System</div>
+              <div class="sys-type">Map Intelligence & Verification</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge live">Live</span>
+              <div class="sys-icon" style="background:var(--green-dim)">🗺</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill green" style="width:68%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">68% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">38k</div>
+              <div class="sys-metric-lbl">Businesses</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">79%</div>
+              <div class="sys-metric-lbl">Verified</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">5,210</div>
+              <div class="sys-metric-lbl">Websites</div>
+            </div>
+          </div>
+          <div style="background:var(--amber-dim);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--amber);line-height:1.4;border:1px solid rgba(245,166,35,0.15)">
+            ⚠ Map API rate limit at 78% — consider batch scheduling to avoid cutoff
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--green-dim);color:var(--green)">GE</div>
+              Geo Engineering
+            </div>
+            <div class="sys-activity">24m ago</div>
+          </div>
+        </div>
+
+        <!-- FABRICANT -->
+        <div class="sys-card" style="border-color:var(--border)">
+          <div class="sys-card-header">
+            <div>
+              <div class="sys-name">Fabricant Detection</div>
+              <div class="sys-type">Business Filter & Website ID</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge building">Building</span>
+              <div class="sys-icon" style="background:var(--bg-4)">🏭</div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill blue" style="width:39%"></div></div>
+          <div style="font-size:9px;color:var(--text-3);margin-top:4px;text-align:right">39% complete</div>
+          <div class="sys-metrics">
+            <div>
+              <div class="sys-metric-val">4,847</div>
+              <div class="sys-metric-lbl">Detected</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">63%</div>
+              <div class="sys-metric-lbl">With Website</div>
+            </div>
+            <div>
+              <div class="sys-metric-val">812</div>
+              <div class="sys-metric-lbl">Verified</div>
+            </div>
+          </div>
+          <div style="background:var(--bg-3);border-radius:7px;padding:8px 10px;font-size:10px;color:var(--text-2);line-height:1.4;border:1px solid var(--border)">
+            🤖 AI: Pattern model identifies manufacturers with 89% accuracy via website + taxonomy cross-reference
+          </div>
+          <div class="sys-footer">
+            <div class="sys-owner">
+              <div class="sys-avatar" style="background:var(--bg-5);color:var(--text-2)">DT</div>
+              Data Team
+            </div>
+            <div class="sys-activity">3h ago</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== PAGE: AI INTELLIGENCE ===== -->
+    <div class="page" id="page-ai">
+
+      <div class="tab-bar">
+        <div class="tab-item active">All Insights</div>
+        <div class="tab-item">Opportunities</div>
+        <div class="tab-item">Anomalies</div>
+        <div class="tab-item">Predictions</div>
+        <div class="tab-item">Recommendations</div>
+      </div>
+
+      <div class="grid-2-1 gap-mb">
+
+        <div>
+          <!-- Cross-system correlations -->
+          <div class="panel gap-mb">
+            <div class="panel-header">
+              <div class="panel-title">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="var(--purple)" stroke-width="1.5"><circle cx="3" cy="3" r="2"/><circle cx="10" cy="3" r="2"/><circle cx="6.5" cy="10" r="2"/><line x1="5" y1="3" x2="8" y2="3"/><line x1="3.8" y1="4.8" x2="5.7" y2="8.4"/><line x1="9.2" y1="4.8" x2="7.3" y2="8.4"/></svg>
+                Cross-System Intelligence Correlations
+              </div>
+              <div class="panel-action">Full Analysis</div>
+            </div>
+            <div class="panel-body">
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background:var(--teal-dim)">🔗</div>
+                <div>
+                  <div class="insight-title">XY Enrichment → RDV Proactive — High Signal</div>
+                  <div class="insight-body">Businesses with verified map presence convert 2.3× better in RDV system. Correlation coefficient: 0.78. Recommendation: prioritize verified XY records for commercial outreach.</div>
+                  <div class="insight-meta">
+                    <span style="color:var(--teal)">●</span> Opportunity · Confidence: 91%
+                    <span>2 systems linked</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background:var(--amber-dim)">⚡</div>
+                <div>
+                  <div class="insight-title">Taxonomy Gap → WhatsApp Routing Failure</div>
+                  <div class="insight-body">Lead mis-routing incidents increase by 340% when business taxonomy coverage is below 65%. Current coverage: 58%. Immediate action needed to prevent lead loss.</div>
+                  <div class="insight-meta">
+                    <span style="color:var(--coral)">●</span> Critical · Confidence: 94%
+                    <span>2 systems affected</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background:var(--accent-glow)">📈</div>
+                <div>
+                  <div class="insight-title">BI-Edicom LES500 → Fabricant Detection Boost</div>
+                  <div class="insight-body">Forms with sector "Industrie" submitted via BI-Edicom can pre-seed Fabricant detection model with 87% less manual validation. Integration point identified.</div>
+                  <div class="insight-meta">
+                    <span style="color:var(--accent)">●</span> Recommendation · Confidence: 83%
+                    <span>2 systems linked</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="insight-card">
+                <div class="insight-icon" style="background:var(--purple-dim)">🧬</div>
+                <div>
+                  <div class="insight-title">WhatsApp Dormant Leads → RDV Reactivation Pool</div>
+                  <div class="insight-body">147 leads marked unqualified in WhatsApp system match 89 confirmed business profiles in XY Enrichment. Reactivation campaign predicted to yield 34–47 additional RDV appointments this month.</div>
+                  <div class="insight-meta">
+                    <span style="color:var(--purple)">●</span> Prediction · Confidence: 87%
+                    <span>3 systems linked</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- WhatsApp Flow Diagram -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">WhatsApp Lead Flow — Live System Map</div>
+              <span class="badge live">Live</span>
+            </div>
+            <div class="panel-body">
+              <div class="flow-diagram">
+                <div class="flow-node">Business Page</div>
+                <div class="flow-arrow"></div>
+                <div class="flow-node active">WhatsApp Bot</div>
+                <div class="flow-arrow"></div>
+                <div class="flow-node active">AI Qualify</div>
+                <div class="flow-arrow"></div>
+                <div class="flow-node">Lead Route</div>
+                <div class="flow-arrow"></div>
+                <div class="flow-node">Delivery</div>
+                <div class="flow-arrow"></div>
+                <div class="flow-node">Marketplace</div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px;text-align:center">
+                <div style="font-size:9px;color:var(--text-3)">5 Pages</div>
+                <div style="font-size:9px;color:var(--accent)">423 In</div>
+                <div style="font-size:9px;color:var(--accent)">144 Qual.</div>
+                <div style="font-size:9px;color:var(--text-3)">In Progress</div>
+                <div style="font-size:9px;color:var(--text-3)">89 Sent</div>
+                <div style="font-size:9px;color:var(--text-3)">Live</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: AI Recommendations -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">AI Recommendations</div>
+              <span style="font-size:9px;color:var(--accent);font-weight:600;letter-spacing:0.5px">CLAUDE ENGINE</span>
+            </div>
+            <div class="panel-body" style="padding:10px 14px">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="background:var(--bg-3);border-radius:8px;padding:10px;border:1px solid var(--border);cursor:pointer">
+                  <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:4px">HIGH PRIORITY</div>
+                  <div style="font-size:11px;color:var(--text-0);margin-bottom:4px">Increase Taxonomy coverage to 65% before June 1</div>
+                  <div style="font-size:10px;color:var(--text-2)">Prevents WhatsApp lead routing failures and unlocks cross-system enrichment</div>
+                </div>
+                <div style="background:var(--bg-3);border-radius:8px;padding:10px;border:1px solid var(--border);cursor:pointer">
+                  <div style="font-size:10px;font-weight:600;color:var(--amber);margin-bottom:4px">MEDIUM PRIORITY</div>
+                  <div style="font-size:11px;color:var(--text-0);margin-bottom:4px">Schedule XY API calls in overnight batches</div>
+                  <div style="font-size:10px;color:var(--text-2)">Reduce daytime rate limit risk — batch 2,000 records/night</div>
+                </div>
+                <div style="background:var(--bg-3);border-radius:8px;padding:10px;border:1px solid var(--border);cursor:pointer">
+                  <div style="font-size:10px;font-weight:600;color:var(--accent-2);margin-bottom:4px">OPPORTUNITY</div>
+                  <div style="font-size:11px;color:var(--text-0);margin-bottom:4px">Launch WhatsApp reactivation campaign on 147 dormant leads</div>
+                  <div style="font-size:10px;color:var(--text-2)">Est. +34 qualified leads, ~230,000 MAD pipeline value</div>
+                </div>
+                <div style="background:var(--bg-3);border-radius:8px;padding:10px;border:1px solid var(--border);cursor:pointer">
+                  <div style="font-size:10px;font-weight:600;color:var(--text-3);margin-bottom:4px">OPTIMIZATION</div>
+                  <div style="font-size:11px;color:var(--text-0);margin-bottom:4px">Connect BI-Edicom output to Fabricant detection pipeline</div>
+                  <div style="font-size:10px;color:var(--text-2)">Saves 340+ hours of manual validation work</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Business Intelligence Score</div>
+            </div>
+            <div class="panel-body" style="padding:14px">
+              <div style="text-align:center;padding:10px 0">
+                <div style="font-size:48px;font-weight:200;letter-spacing:-3px;color:var(--text-0)">87<span style="font-size:22px;opacity:0.5">%</span></div>
+                <div style="font-size:10px;color:var(--text-3);margin-top:4px;letter-spacing:0.8px;text-transform:uppercase">Global AI Confidence Score</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2)">
+                  <span>Data Coverage</span><span style="color:var(--text-0);font-family:'DM Mono',monospace">82%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill blue" style="width:82%"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-top:6px">
+                  <span>Lead Quality</span><span style="color:var(--text-0);font-family:'DM Mono',monospace">91%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill teal" style="width:91%"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-top:6px">
+                  <span>Taxonomy Accuracy</span><span style="color:var(--text-0);font-family:'DM Mono',monospace">74%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill purple" style="width:74%"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-top:6px">
+                  <span>Verification Rate</span><span style="color:var(--text-0);font-family:'DM Mono',monospace">79%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width:79%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: OPS MONITORING ===== -->
+    <div class="page" id="page-ops">
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi-card coral">
+          <div class="kpi-label">Critical Blockers</div>
+          <div class="kpi-value">2</div>
+          <div class="kpi-delta down">Requires Action</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Active Bottlenecks</div>
+          <div class="kpi-value">5</div>
+          <div class="kpi-delta neutral">Monitoring</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Team Activity</div>
+          <div class="kpi-value">18<span>/22</span></div>
+          <div class="kpi-delta up">Members Active</div>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-label">System Uptime</div>
+          <div class="kpi-value">99<span>.7%</span></div>
+          <div class="kpi-delta up">All Operational</div>
+        </div>
+      </div>
+
+      <div class="grid-2 gap-mb">
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Transformation Blockers</div>
+            <span class="badge critical">2 Critical</span>
+          </div>
+          <div>
+            <div class="monitor-row">
+              <div style="width:3px;height:40px;background:var(--coral);border-radius:2px;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:var(--coral);margin-bottom:2px">CRITICAL — WhatsApp Bot Qualification Rate</div>
+                <div style="font-size:10px;color:var(--text-2)">Rate at 34% vs 60% target. Bot training dataset insufficient for sector diversification.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:9px;color:var(--text-3)">System</div>
+                <div style="font-size:10px;color:var(--text-1)">WhatsApp Lead</div>
+              </div>
+            </div>
+            <div class="monitor-row">
+              <div style="width:3px;height:40px;background:var(--coral);border-radius:2px;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:var(--coral);margin-bottom:2px">CRITICAL — FMC Validation Queue Backlog</div>
+                <div style="font-size:10px;color:var(--text-2)">3 forms blocked pending Operations sign-off. Delay risk: 48h on downstream workflows.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:9px;color:var(--text-3)">System</div>
+                <div style="font-size:10px;color:var(--text-1)">FMC Form System</div>
+              </div>
+            </div>
+            <div class="monitor-row">
+              <div style="width:3px;height:40px;background:var(--amber);border-radius:2px;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:2px">WARNING — XY API Rate Limit</div>
+                <div style="font-size:10px;color:var(--text-2)">Map API usage at 78% of daily quota. Enrichment pipeline may pause if not batched.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:9px;color:var(--text-3)">System</div>
+                <div style="font-size:10px;color:var(--text-1)">XY Enrichment</div>
+              </div>
+            </div>
+            <div class="monitor-row">
+              <div style="width:3px;height:40px;background:var(--amber);border-radius:2px;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:2px">WARNING — Taxonomy B2B Coverage Gap</div>
+                <div style="font-size:10px;color:var(--text-2)">B2B sector taxonomy at 58% — below 65% threshold required for WhatsApp routing accuracy.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:9px;color:var(--text-3)">System</div>
+                <div style="font-size:10px;color:var(--text-1)">Taxonomy System</div>
+              </div>
+            </div>
+            <div class="monitor-row">
+              <div style="width:3px;height:40px;background:var(--text-3);border-radius:2px;flex-shrink:0"></div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:500;color:var(--text-1);margin-bottom:2px">MONITOR — Fabricant Model Training Delay</div>
+                <div style="font-size:10px;color:var(--text-2)">Detection model retraining scheduled for Week 3. Dataset collection 62% complete.</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:9px;color:var(--text-3)">System</div>
+                <div style="font-size:10px;color:var(--text-1)">Fabricant Detection</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">System Dependencies Map</div>
+          </div>
+          <div class="panel-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>System</th>
+                  <th>Depends On</th>
+                  <th>Status</th>
+                  <th>Risk</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">WhatsApp Lead</td>
+                  <td class="mono">Taxonomy, XY Enrich</td>
+                  <td><span class="badge building">Building</span></td>
+                  <td style="color:var(--coral)">High</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">RDV Proactive</td>
+                  <td class="mono">BI-Edicom, XY Enrich</td>
+                  <td><span class="badge live">Live</span></td>
+                  <td style="color:var(--green)">Low</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Fabricant Detection</td>
+                  <td class="mono">XY Enrich, Taxonomy</td>
+                  <td><span class="badge building">Building</span></td>
+                  <td style="color:var(--amber)">Medium</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">BI-Edicom</td>
+                  <td class="mono">FMC Forms</td>
+                  <td><span class="badge live">Live</span></td>
+                  <td style="color:var(--amber)">Medium</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">XY Enrichment</td>
+                  <td class="mono">Map API External</td>
+                  <td><span class="badge live">Live</span></td>
+                  <td style="color:var(--amber)">Medium</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Team Activity — Live</div>
+          <div style="font-size:10px;color:var(--text-3)">18/22 members active</div>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+            <div style="background:var(--bg-3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-glow);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent-2)">MA</div>
+              <div style="font-size:10px;color:var(--text-1);margin-bottom:2px">M. Alami</div>
+              <div style="font-size:9px;color:var(--text-3)">RDV System</div>
+              <div style="width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0"></div>
+            </div>
+            <div style="background:var(--bg-3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--teal-dim);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--teal)">SB</div>
+              <div style="font-size:10px;color:var(--text-1);margin-bottom:2px">S. Benali</div>
+              <div style="font-size:9px;color:var(--text-3)">BI Intelligence</div>
+              <div style="width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0"></div>
+            </div>
+            <div style="background:var(--bg-3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--amber-dim);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--amber)">AK</div>
+              <div style="font-size:10px;color:var(--text-1);margin-bottom:2px">A. Khalil</div>
+              <div style="font-size:9px;color:var(--text-3)">WhatsApp / AI</div>
+              <div style="width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0"></div>
+            </div>
+            <div style="background:var(--bg-3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--green-dim);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green)">NE</div>
+              <div style="font-size:10px;color:var(--text-1);margin-bottom:2px">N. El Fassi</div>
+              <div style="font-size:9px;color:var(--text-3)">XY Enrichment</div>
+              <div style="width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0"></div>
+            </div>
+            <div style="background:var(--bg-3);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border);opacity:0.5">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--bg-5);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3)">YM</div>
+              <div style="font-size:10px;color:var(--text-2);margin-bottom:2px">Y. Mansour</div>
+              <div style="font-size:9px;color:var(--text-3)">Taxonomy</div>
+              <div style="width:5px;height:5px;border-radius:50%;background:var(--text-3);margin:4px auto 0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: DATA INTELLIGENCE ===== -->
+    <div class="page" id="page-data">
+
+      <div class="kpi-grid">
+        <div class="kpi-card teal">
+          <div class="kpi-label">Businesses Enriched</div>
+          <div class="kpi-value">38<span>k</span></div>
+          <div class="kpi-delta up">↑ +2.1k this week</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Websites Detected</div>
+          <div class="kpi-value">5<span>,210</span></div>
+          <div class="kpi-delta up">↑ +187 this week</div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-label">Manufacturers ID'd</div>
+          <div class="kpi-value">4<span>,847</span></div>
+          <div class="kpi-delta up">↑ +340 this week</div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-label">Taxonomy Coverage</div>
+          <div class="kpi-value">58<span>%</span></div>
+          <div class="kpi-delta down">↓ Below 65% target</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Data Quality Score</div>
+          <div class="kpi-value">87<span>%</span></div>
+          <div class="kpi-delta up">↑ +2pts this week</div>
+        </div>
+      </div>
+
+      <div class="grid-2 gap-mb">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Data Enrichment Pipeline</div>
+            <div class="panel-action">Export Report</div>
+          </div>
+          <div class="panel-body">
+            <canvas id="enrichChart" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Verification Progress by Zone</div>
+          </div>
+          <div class="panel-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Zone</th>
+                  <th>Total</th>
+                  <th>Verified</th>
+                  <th>Coverage</th>
+                  <th>Quality</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Casa Centre</td>
+                  <td class="mono">8,420</td>
+                  <td class="mono">7,180</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill teal" style="width:85%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">85%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--green)">High</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Casa-Anfa</td>
+                  <td class="mono">6,210</td>
+                  <td class="mono">5,100</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill blue" style="width:82%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">82%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--green)">High</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Casa-Est</td>
+                  <td class="mono">5,840</td>
+                  <td class="mono">4,100</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill amber" style="width:70%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">70%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--amber)">Medium</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Ain Sebaa</td>
+                  <td class="mono">4,920</td>
+                  <td class="mono">3,100</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill coral" style="width:63%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">63%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--amber)">Medium</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Bouskoura</td>
+                  <td class="mono">3,100</td>
+                  <td class="mono">1,620</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill purple" style="width:52%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">52%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--coral)">Low</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Mohammedia</td>
+                  <td class="mono">2,840</td>
+                  <td class="mono">1,220</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="progress-bar" style="width:60px;margin:0"><div class="progress-fill coral" style="width:43%"></div></div>
+                      <span style="font-size:10px;color:var(--text-2)">43%</span>
+                    </div>
+                  </td>
+                  <td style="color:var(--coral)">Low</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">AI Confidence Levels</div>
+          </div>
+          <div class="panel-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-bottom:4px">
+                  <span>XY Map Verification</span>
+                  <span style="font-family:'DM Mono',monospace;color:var(--text-0)">94%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill teal" style="width:94%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-bottom:4px">
+                  <span>Fabricant Detection</span>
+                  <span style="font-family:'DM Mono',monospace;color:var(--text-0)">89%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill blue" style="width:89%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-bottom:4px">
+                  <span>Lead Qualification</span>
+                  <span style="font-family:'DM Mono',monospace;color:var(--text-0)">87%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill purple" style="width:87%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-bottom:4px">
+                  <span>Taxonomy Classification</span>
+                  <span style="font-family:'DM Mono',monospace;color:var(--text-0)">74%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill amber" style="width:74%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-2);margin-bottom:4px">
+                  <span>Website Detection</span>
+                  <span style="font-family:'DM Mono',monospace;color:var(--text-0)">82%</span>
+                </div>
+                <div class="progress-bar"><div class="progress-fill green" style="width:82%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="grid-column:span 2">
+          <div class="panel-header">
+            <div class="panel-title">Data Quality Matrix — Sector Breakdown</div>
+          </div>
+          <div class="panel-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sector</th>
+                  <th>Count</th>
+                  <th>Enriched</th>
+                  <th>Website</th>
+                  <th>Taxonomy</th>
+                  <th>Fabricant</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Commerce</td>
+                  <td class="mono">12,400</td>
+                  <td><span class="badge live">92%</span></td>
+                  <td class="mono">34%</td>
+                  <td class="mono">78%</td>
+                  <td class="mono">—</td>
+                  <td style="color:var(--green);font-weight:600">A</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Industrie</td>
+                  <td class="mono">8,200</td>
+                  <td><span class="badge live">87%</span></td>
+                  <td class="mono">51%</td>
+                  <td class="mono">62%</td>
+                  <td class="mono">89%</td>
+                  <td style="color:var(--green);font-weight:600">B+</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Services</td>
+                  <td class="mono">7,840</td>
+                  <td><span class="badge building">74%</span></td>
+                  <td class="mono">48%</td>
+                  <td class="mono">51%</td>
+                  <td class="mono">—</td>
+                  <td style="color:var(--amber);font-weight:600">B</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Restauration</td>
+                  <td class="mono">4,210</td>
+                  <td><span class="badge building">68%</span></td>
+                  <td class="mono">71%</td>
+                  <td class="mono">44%</td>
+                  <td class="mono">—</td>
+                  <td style="color:var(--amber);font-weight:600">C+</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Immobilier</td>
+                  <td class="mono">3,100</td>
+                  <td><span class="badge paused">58%</span></td>
+                  <td class="mono">82%</td>
+                  <td class="mono">38%</td>
+                  <td class="mono">—</td>
+                  <td style="color:var(--amber);font-weight:600">C</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500;color:var(--text-0)">Construction</td>
+                  <td class="mono">2,250</td>
+                  <td><span class="badge paused">52%</span></td>
+                  <td class="mono">29%</td>
+                  <td class="mono">31%</td>
+                  <td class="mono">76%</td>
+                  <td style="color:var(--coral);font-weight:600">D</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// Navigation
+const pageConfig = {
+  exec: {title:'Executive Transformation Dashboard', sub:'Groupe Edicom · Télécontact — Strategic Command'},
+  systems: {title:'Systems Registry', sub:'7 Systems · Centralised Operational View'},
+  ai: {title:'AI Intelligence Center', sub:'Cross-System Signals · Recommendations · Predictions'},
+  ops: {title:'Operational Monitoring Center', sub:'Blockers · Alerts · Team Activity · Dependencies'},
+  data: {title:'Data Intelligence Dashboard', sub:'Enrichment · Quality · Coverage · Verification'}
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const nav = document.querySelectorAll('.nav-item');
+  const navMap = {exec:0,systems:1,ai:2,ops:3,data:4};
+  nav[navMap[id]].classList.add('active');
+  document.getElementById('page-title').textContent = pageConfig[id].title;
+  document.getElementById('page-sub').textContent = pageConfig[id].sub;
+  if(id==='exec') setTimeout(initLeadChart, 100);
+  if(id==='data') setTimeout(initEnrichChart, 100);
+}
+
+// Chart: Lead Activity
+let leadChartInst = null;
+function initLeadChart() {
+  const ctx = document.getElementById('leadChart');
+  if(!ctx) return;
+  if(leadChartInst) leadChartInst.destroy();
+  const labels = Array.from({length:30},(_,i)=>{ const d=new Date(2025,4,i+1); return d.getDate() });
+  const wa = Array.from({length:30},()=>Math.floor(Math.random()*40+10));
+  const rdv = Array.from({length:30},()=>Math.floor(Math.random()*20+5));
+  const bi = Array.from({length:30},()=>Math.floor(Math.random()*15+3));
+  leadChartInst = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'WhatsApp',data:wa,borderColor:'#4F7EFF',backgroundColor:'rgba(79,126,255,0.08)',borderWidth:1.5,pointRadius:0,tension:0.4,fill:true},
+        {label:'RDV',data:rdv,borderColor:'#00D4AA',backgroundColor:'rgba(0,212,170,0.06)',borderWidth:1.5,pointRadius:0,tension:0.4,fill:true},
+        {label:'BI Form',data:bi,borderColor:'#F5A623',backgroundColor:'rgba(245,166,35,0.06)',borderWidth:1.5,pointRadius:0,tension:0.4,fill:true}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1C2235',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+        titleColor:'#A8AEC2',bodyColor:'#F0F2F7',cornerRadius:8,
+        titleFont:{family:'DM Sans',size:10},bodyFont:{family:'DM Sans',size:11}
+      }},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.03)'},ticks:{color:'#3E4466',font:{size:10,family:'DM Sans'}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3E4466',font:{size:10,family:'DM Mono'}},border:{dash:[3,3]}}
+      },
+      interaction:{mode:'index',intersect:false}
+    }
+  });
+}
+
+// Chart: Enrichment
+let enrichChartInst = null;
+function initEnrichChart() {
+  const ctx = document.getElementById('enrichChart');
+  if(!ctx) return;
+  if(enrichChartInst) enrichChartInst.destroy();
+  const labels = ['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8'];
+  enrichChartInst = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Enriched',data:[2800,3400,4200,5100,6800,7200,8400,38000/8],backgroundColor:'rgba(0,212,170,0.3)',borderColor:'var(--teal)',borderWidth:1.5,borderRadius:4},
+        {label:'Verified',data:[2100,2700,3400,4100,5400,5800,6800,5900],backgroundColor:'rgba(79,126,255,0.2)',borderColor:'#4F7EFF',borderWidth:1.5,borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1C2235',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+        titleColor:'#A8AEC2',bodyColor:'#F0F2F7',cornerRadius:8
+      }},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#3E4466',font:{size:10,family:'DM Sans'}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3E4466',font:{size:10,family:'DM Mono'}}}
+      }
+    }
+  });
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initLeadChart, 200);
+  // Animate progress bars
+  setTimeout(() => {
+    document.querySelectorAll('.progress-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = w; }, 100);
+    });
+  }, 100);
+});
+</script>
+</body>
+</html>
